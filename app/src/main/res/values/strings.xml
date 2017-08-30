@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">StormyJoints</string>
+    <string name="dialog_title">Error</string>
+    <string name="dialog_message">Please Try Again</string>
+    <string name="dialog_positive_button">OK</string>
+    <string name="Network_Down">Network Unavailable</string>
+</resources>
