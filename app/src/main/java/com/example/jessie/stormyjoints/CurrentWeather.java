@@ -10,6 +10,8 @@ import java.util.TimeZone;
  */
 
 public class CurrentWeather {
+    
+    // Instance variables
     private String mIcon;
     private long mTime;
     private double mTemperature;
@@ -20,6 +22,7 @@ public class CurrentWeather {
     private int mIconId;
     private String mLocation;
 
+    // Getters and setters for the variables
     public void setIconId(int iconId) {
         mIconId = iconId;
     }
@@ -49,6 +52,7 @@ public class CurrentWeather {
     }
 
     public int getIconId() {
+        // Set the right icon for the weather
         // clear-day, clear-night, rain, snow, sleet, wind, fog,
         // cloudy, partly-cloudy-day, or partly-cloudy-night
 
@@ -75,7 +79,6 @@ public class CurrentWeather {
         } else if (mIcon.equals("partly-cloudy-night")) {
             mIconId = R.drawable.cloudy_night;
         }
-
         return mIconId;
     }
 
@@ -96,7 +99,6 @@ public class CurrentWeather {
     }
 
     public int getTemperature() {
-
         return (int) Math.round(mTemperature);
     }
 
