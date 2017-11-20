@@ -30,6 +30,7 @@ import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
 
+    // Variables for testing/network/class
     public static final String TAG = MainActivity.class.getSimpleName();
     public boolean isAvailable = false;
     private CurrentWeather mCurrentWeather;
@@ -45,21 +46,20 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.refreshImageView) ImageView mRefreshImageView;
     @BindView(R.id.refreshProgressBar) ProgressBar mRefreshProgressBar;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
         // Start ButterKnife Api
         ButterKnife.bind(this);
 
         // Hide the progress bar
         mRefreshProgressBar.setVisibility(View.INVISIBLE);
 
+        // Variables for hard coded locations; Can be changed/generalized
         final double lat = 37.8267;
         final double lon = -122.4233;
-
 
         mRefreshImageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -67,9 +67,7 @@ public class MainActivity extends AppCompatActivity {
                 getForecast(lat, lon);
             }
         });
-
         getForecast(lat,lon);
-
     }
 
     // Method to get forecast and display it properly
@@ -80,23 +78,21 @@ public class MainActivity extends AppCompatActivity {
         // Key: 5c00b1c78c611027dcff3b6f26a4786d
         String apiKey = "5c00b1c78c611027dcff3b6f26a4786d";
 
-        String forecastUrl = "https://api.darksky.net/forecast/" + apiKey + "/"
-                + lat + "," + lon;
-
-
+        String forecastUrl = "https://api.darksky.net/forecast/" + 
+                              apiKey + "/" + lat + "," + lon;
+        
+        // Check network status and update if the network is good
         if (networkAvailable()) {
-
             toggleRefreshView();
-
             OkHttpClient client = new OkHttpClient();
             Request request = new Request.Builder().url(forecastUrl).build();
-
             Call call = client.newCall(request);
-
             call.enqueue(new Callback() {
+                
                 @Override
                 public void onFailure(Call call, IOException e) {
-                    // Because we are in the background thread because of the Callback
+                    
+                    // Need this because we are in the background thread due to the Callback
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -108,7 +104,8 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
-                    // Because we are in the background thread because of the Callback
+                    
+                    // Because we are in the background thread due to the Callback
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -117,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
                     });
 
                     try {
-                        //Log.v(TAG, response.body().string());
+                        // Log.v(TAG, response.body().string()); // used for testing and debugging
                         String jsonData = response.body().string();
                         if (response.isSuccessful()) {
                             mCurrentWeather = getCurrentDetails(jsonData);
@@ -128,7 +125,6 @@ public class MainActivity extends AppCompatActivity {
                                     updateDisplay();
                                 }
                             });
-
                         } else {
                             alertUserAboutError();
                         }
@@ -145,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Toggle refresh view
+    // Toggle refresh view at the right time
     private void toggleRefreshView() {
         if (mRefreshProgressBar.getVisibility() == View.INVISIBLE){
             mRefreshProgressBar.setVisibility(View.VISIBLE);
@@ -154,31 +150,31 @@ public class MainActivity extends AppCompatActivity {
             mRefreshProgressBar.setVisibility(View.INVISIBLE);
             mRefreshImageView.setVisibility(View.VISIBLE);
         }
-
-
     }
 
-   // @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+   // For reference: @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+   // Update the screen with current weather
     private void updateDisplay() {
         mTempTextView.setText(mCurrentWeather.getTemperature()+"");
         mHumidNumTextView.setText(mCurrentWeather.getHumidity()+"");
         mTimeTextView.setText("At " + mCurrentWeather.getFormattedTime() + " it will be");
         mRainPercTextView.setText(mCurrentWeather.getPrecipChance() +"%");
         mSummaryTextView.setText((mCurrentWeather.getSummary()));
-
-        //Drawable drawable = getResources().getDrawable(mCurrentWeather.getIconId(),null);
-       // mWeatherImageView.setImageDrawable(drawable);
-
         mWeatherImageView.setImageResource(mCurrentWeather.getIconId());
 
+       /*
+       Testing out different ways to update icon
+       Drawable drawable = getResources().getDrawable(mCurrentWeather.getIconId(),null);
+       mWeatherImageView.setImageDrawable(drawable);
+       */     
     }
 
+    // Get details about the weather 
     private CurrentWeather getCurrentDetails(String jsonData) throws JSONException {
         JSONObject jsonObject = new JSONObject(jsonData);
         JSONObject currently = jsonObject.getJSONObject("currently");
 
         CurrentWeather currentWeather = new CurrentWeather();
-
         currentWeather.setHumidity(currently.getDouble("humidity"));
         currentWeather.setIcon(currently.getString("icon"));
         currentWeather.setPrecipChance(currently.getDouble("precipProbability"));
@@ -187,14 +183,13 @@ public class MainActivity extends AppCompatActivity {
         currentWeather.setSummary(currently.getString("summary"));
         currentWeather.setTimezone(jsonObject.getString("timezone"));
 
-
         return currentWeather;
     }
 
-
+    // Method for checking the network
     private boolean networkAvailable() {
         ConnectivityManager connectivityManager = (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE);
+        getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()){
             isAvailable = true;
@@ -202,6 +197,7 @@ public class MainActivity extends AppCompatActivity {
         return isAvailable;
     }
 
+    // Error messaging method - Dialog box
     private void alertUserAboutError() {
         // notes: when to create a new object and when to call a method on it
         AlertDialogFragment dialogFragment = new AlertDialogFragment();
